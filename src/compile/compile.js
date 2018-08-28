@@ -107,9 +107,19 @@ module.exports = function(Velocity, utils) {
 
       return str;
     },
-    format: function(value) {
+    
+    /**
+     * format the value
+     * @param value
+     * @param inObj 如果在对象中的字符串，则输出时添加引号
+     */
+    format: function(value, inObj) {
+      var that = this;
+
       if (utils.isArray(value)) {
-        return "[" + value.map(this.format.bind(this)).join(", ") + "]";
+        return "[" + value.map(function(val) {
+          return that.format(val, true);
+        }).join(", ") + "]";
       }
 
       if (utils.isObject(value)) {
@@ -117,11 +127,11 @@ module.exports = function(Velocity, utils) {
           return value;
         }
 
-        var kvJoin = function(k) { return k + "=" + this.format(value[k]); }.bind(this);
+        var kvJoin = function(k) { return k + ':' + this.format(value[k], true); }.bind(this);
         return "{" + Object.keys(value).map(kvJoin).join(", ") + "}";
       }
 
-      return value;
+      return typeof value === 'string' && inObj ? '\'' + value + '\'' : value;
     }
   });
 };
